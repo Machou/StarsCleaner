@@ -1,4 +1,8 @@
+// app.js
 (function () {
+    // ------------------------------
+    //  State
+    // ------------------------------
     let repos = (window.STARRED_REPOS || []).map((r) => ({ ...r }));
     let currentSort = { key: "stars", dir: "desc" };
     let showArchivedOnly = false;
@@ -9,6 +13,9 @@
     // Cache of loaded translation dictionaries
     const dictionaries = {};
 
+    // ------------------------------
+    //  Translation helpers
+    // ------------------------------
     function getDict(lang) {
         return dictionaries[lang || currentLang] || dictionaries["fr"] || {};
     }
@@ -32,6 +39,10 @@
         initLanguageFilterOptions(); // refresh labels ("All languages", etc.)
         render(); // refresh table + count
     }
+
+    // ------------------------------
+    //  Formatting helpers
+    // ------------------------------
 
     // Format stars with French thousands separator (1 000, 10 000, 100 000)
     function formatStars(count) {
@@ -77,6 +88,9 @@
             .replace(/>/g, "&gt;");
     }
 
+    // ------------------------------
+    //  Count visible repositories
+    // ------------------------------
     function updateCount() {
         const el = document.getElementById("repo-count");
         if (!el) return;
@@ -111,6 +125,9 @@
         el.textContent = `${visibles} / ${total} ${label}`;
     }
 
+    // ------------------------------
+    //  Sorting
+    // ------------------------------
     function sortRepos() {
         const { key, dir } = currentSort;
         const factor = dir === "asc" ? 1 : -1;
@@ -146,6 +163,7 @@
             return 0;
         });
     }
+
     function render() {
         sortRepos();
 

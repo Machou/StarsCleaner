@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const GITHUB_TOKEN = process.env.STARRED_TOKEN;
 const fs = require('fs');
 const path = require('path');

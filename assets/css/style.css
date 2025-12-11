@@ -92,12 +92,12 @@ h1 {
 h1 span.logo {
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 999px;
+    border-radius: 3rem;
     background: radial-gradient(circle at 30% 20%, rgba(250,204,21, 1), rgba(249,115,22, 1), rgba(236,72,153, 1));
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: rgba(2, 6, 23, 1);
     box-shadow: 0 12px 35px rgba(236,72,153, .6);
 }
@@ -136,7 +136,7 @@ main {
 .controls-right {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 2rem;
     flex-wrap: wrap;
 }
 
@@ -159,7 +159,7 @@ input[type="checkbox"] {
     background: linear-gradient(135deg, rgba(15, 23, 42, .98), rgba(15, 23, 42, 1));
     color: var(--fg);
     padding: 0.45rem 0.9rem;
-    border-radius: 999px;
+    border-radius: 3rem;
     font-size: 0.85rem;
     display: inline-flex;
     align-items: center;
@@ -178,6 +178,10 @@ body.light .btn {
     box-shadow: 0 8px 20px rgba(15, 23, 42, .12);
 }
 
+.filters-language {
+	cursor: pointer;
+}
+
 .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 12px 28px rgba(15, 23, 42, .8);
@@ -185,9 +189,9 @@ body.light .btn {
 }
 
 .badge {
-    font-size: 0.75rem;
-    border-radius: 999px;
-    padding: 0.1rem 0.5rem;
+    font-size: .9rem;
+    border-radius: 1.5rem;
+    padding: .5rem 1rem;
     background: var(--accent-soft);
     color: var(--accent);
     border: 1px solid rgba(59, 130, 246, .35);
@@ -202,7 +206,7 @@ body.light .btn {
 
 .field input[type="text"],
 .field select {
-    border-radius: 999px;
+    border-radius: 3rem;
     border: 1px solid var(--border);
     background: rgba(15, 23, 42, .8);
     color: var(--fg);
@@ -324,7 +328,7 @@ body.light tbody tr:hover {
 }
 
 td.numeric {
-    text-align: right;
+    text-align: center;
     font-variant-numeric: tabular-nums;
 }
 
@@ -356,7 +360,7 @@ td.description {
     gap: 0.25rem;
     font-size: 0.75rem;
     padding: 0.15rem 0.55rem;
-    border-radius: 999px;
+    border-radius: 3rem;
     background: rgba(239, 68, 68, .14);
     color: #fca5a5;
     border: 1px solid rgba(239, 68, 68, .4);
@@ -369,6 +373,7 @@ body.light .pill-archived {
 
 .hint {
 	font-size: .9rem;
+	padding: .5rem 0 0 0;
 }
 
 @media (max-width: 768px) {
