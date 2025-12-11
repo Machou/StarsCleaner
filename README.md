@@ -37,7 +37,7 @@ tree -L 3 -I "node_modules"
 
 ## 🖼️ Aperçu
 
-![Aperçu](./assets/img/preview.png)
+![Aperçu](./assets/img/preview.png?v2)
 
 
 ## 👨‍💻 Contribuer
