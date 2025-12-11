@@ -5,11 +5,69 @@
     let showArchivedOnly = false;
     let searchQuery = "";
     let languageFilter = "__ALL__";
+    let currentLang = "fr";
+
+    const I18N = {
+        fr: {
+            title: "Dépôts GitHub étoilés",
+            subtitle: "Liste triable, filtrable, avec masquage automatique au clic.",
+            theme_button_dark: "Mode sombre",
+            theme_button_light: "Mode clair",
+            lang_button: "EN",
+            show_archived_only: "Afficher uniquement les dépôts archivés",
+            search_label: "Recherche :",
+            search_placeholder: "Nom du dépôt...",
+            language_label: "Langage :",
+            col_repo: "Dépôt",
+            col_description: "Description",
+            col_language: "Langage",
+            col_stars: "★",
+            col_created: "Créé le",
+            col_pushed: "Dernière activité",
+            col_archived: "Archivé",
+            hint: "💡 Clique sur le nom d’un dépôt pour l’ouvrir dans un nouvel onglet et le masquer de la liste.",
+            count_singular: "dépôt étoilé",
+            count_plural: "dépôts étoilés",
+            all_languages: "Toutes langues",
+            no_language: "(Sans langage)",
+            pill_archived: "Archivé"
+        },
+        en: {
+            title: "Starred GitHub repositories",
+            subtitle: "Sortable, filterable list with auto-hide on click.",
+            theme_button_dark: "Dark mode",
+            theme_button_light: "Light mode",
+            lang_button: "FR",
+            show_archived_only: "Show archived repositories only",
+            search_label: "Search:",
+            search_placeholder: "Repository name...",
+            language_label: "Language:",
+            col_repo: "Repository",
+            col_description: "Description",
+            col_language: "Language",
+            col_stars: "★",
+            col_created: "Created at",
+            col_pushed: "Last activity",
+            col_archived: "Archived",
+            hint: "💡 Click on a repository name to open it in a new tab and hide it from the list.",
+            count_singular: "starred repository",
+            count_plural: "starred repositories",
+            all_languages: "All languages",
+            no_language: "(No language)",
+            pill_archived: "Archived"
+        }
+    };
+
+    function getT(key) {
+        const lang = I18N[currentLang] || I18N.fr;
+        return lang[key] ?? key;
+    }
 
     function formatDate(iso) {
         if (!iso) return "";
         const d = new Date(iso);
         if (Number.isNaN(d.getTime())) return iso;
+        // On garde fr-FR même en EN pour un format lisible; si tu veux, tu peux adapter
         return d.toLocaleDateString("fr-FR", {
             year: "numeric",
             month: "short",
@@ -48,7 +106,9 @@
             return true;
         }).length;
 
-        const label = total === 1 ? "dépôt étoilé" : "dépôts étoilés";
+        const label =
+            total === 1 ? getT("count_singular") : getT("count_plural");
+
         el.textContent = `${visibles} / ${total} ${label}`;
     }
 
@@ -120,7 +180,7 @@
           <td class="numeric">${repo.stargazers_count || 0}</td>
           <td>${formatDate(repo.created_at)}</td>
           <td>${formatDate(repo.pushed_at)}</td>
-          <td>${repo.archived ? '<span class="pill-archived">Archivé</span>' : ""}</td>
+          <td>${repo.archived ? `<span class="pill-archived">${escapeHtml(getT("pill_archived"))}</span>` : ""}</td>
         </tr>
       `;
         });
@@ -145,8 +205,8 @@
         );
 
         let options = `
-      <option value="__ALL__">Toutes langues</option>
-      <option value="__NONE__">(Sans langage)</option>
+      <option value="__ALL__">${escapeHtml(getT("all_languages"))}</option>
+      <option value="__NONE__">${escapeHtml(getT("no_language"))}</option>
     `;
         languages.forEach((lang) => {
             options += `<option value="${escapeHtml(lang)}">${escapeHtml(lang)}</option>`;
@@ -162,34 +222,61 @@
         });
     }
 
+    function applyTranslations() {
+        // Textes simples
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+            const key = el.getAttribute("data-i18n");
+            if (!key) return;
+            // On laisse l'emoji dans le hint (déjà inclus dans la string fr/en)
+            el.textContent = getT(key);
+        });
+
+        // Placeholders
+        document
+            .querySelectorAll("[data-i18n-placeholder]")
+            .forEach((el) => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (!key) return;
+                el.setAttribute("placeholder", getT(key));
+            });
+
+        // Bouton thème : texte dépend aussi de l’état actuel (light/dark)
+        const themeBtn = document.getElementById("toggle-theme");
+        if (themeBtn) {
+            const isLight = document.body.classList.contains("light");
+            themeBtn.textContent = isLight
+                ? getT("theme_button_dark")
+                : getT("theme_button_light");
+        }
+
+        // Bouton langue
+        const langBtn = document.getElementById("toggle-lang");
+        if (langBtn) {
+            langBtn.textContent = getT("lang_button");
+        }
+
+        // Re-générer le select langage (labels "Toutes langues" / "(Sans langage)")
+        initLanguageFilter();
+
+        // Re-rendu du tableau (pour pill "Archivé" / compteur)
+        render();
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.getElementById("repo-body");
         const toggleArchived = document.getElementById("toggle-archived");
         const toggleTheme = document.getElementById("toggle-theme");
+        const toggleLang = document.getElementById("toggle-lang");
         const searchInput = document.getElementById("search-name");
-
-        // Thème : light par défaut (déjà sur le body dans index.html)
-        if (toggleTheme) {
-            toggleTheme.textContent = "Mode sombre";
-            toggleTheme.addEventListener("click", () => {
-                const body = document.body;
-                const isLight = body.classList.toggle("light");
-                // si après toggle, body.light est vrai => thème light
-                // donc on adapte le texte en conséquence
-                toggleTheme.textContent = isLight ? "Mode sombre" : "Mode clair";
-            });
-        }
 
         // Tri par défaut : étoiles desc
         currentSort = { key: "stars", dir: "desc" };
         const thStars = document.querySelector('th[data-sort="stars"]');
         if (thStars) thStars.classList.add("sorted-desc");
 
-        // Init filtre langage
-        initLanguageFilter();
-
-        // Rendu initial
-        render();
+        // Langue par défaut : fr
+        currentLang = "fr";
+        applyTranslations();
 
         // Masquage au clic sur un dépôt
         tbody.addEventListener("click", (event) => {
@@ -209,7 +296,7 @@
             render();
         });
 
-        // Recherche par nom (full_name + name)
+        // Recherche par nom
         if (searchInput) {
             searchInput.addEventListener("input", () => {
                 searchQuery = searchInput.value.trim();
@@ -239,5 +326,24 @@
                 render();
             });
         });
+
+        // Toggle thème
+        if (toggleTheme) {
+            toggleTheme.addEventListener("click", () => {
+                const body = document.body;
+                const isLight = body.classList.toggle("light");
+                toggleTheme.textContent = isLight
+                    ? getT("theme_button_dark")
+                    : getT("theme_button_light");
+            });
+        }
+
+        // Toggle langue FR <-> EN
+        if (toggleLang) {
+            toggleLang.addEventListener("click", () => {
+                currentLang = currentLang === "fr" ? "en" : "fr";
+                applyTranslations();
+            });
+        }
     });
 })();
