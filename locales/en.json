@@ -1,0 +1,23 @@
+{
+    "title": "Stars Cleaner",
+    "subtitle": "Sortable, filterable list with auto-hide on click.",
+    "theme_button_dark": "Dark mode",
+    "theme_button_light": "Light mode",
+    "show_archived_only": "Show archived repositories only",
+    "search_label": "Search:",
+    "search_placeholder": "Repository name...",
+    "language_label": "Language:",
+    "col_repo": "Repository",
+    "col_description": "Description",
+    "col_language": "Language",
+    "col_stars": "Stars ★",
+    "col_created": "Created at",
+    "col_pushed": "Last activity",
+    "col_archived": "Archived",
+    "hint": "💡 Click on a repository name to open it in a new tab and hide it from the list.",
+    "count_singular": "starred repository",
+    "count_plural": "starred repositories",
+    "all_languages": "All languages",
+    "no_language": "(No language)",
+    "pill_archived": "Archived"
+}

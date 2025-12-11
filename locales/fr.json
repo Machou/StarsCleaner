@@ -1,0 +1,23 @@
+{
+    "title": "Stars Cleaner",
+    "subtitle": "Liste triable, filtrable, avec masquage automatique au clic.",
+    "theme_button_dark": "Mode sombre",
+    "theme_button_light": "Mode clair",
+    "show_archived_only": "Afficher uniquement les dépôts archivés",
+    "search_label": "Recherche :",
+    "search_placeholder": "Nom du dépôt...",
+    "language_label": "Langage :",
+    "col_repo": "Dépôt",
+    "col_description": "Description",
+    "col_language": "Langage",
+    "col_stars": "Étoiles ★",
+    "col_created": "Créé le",
+    "col_pushed": "Dernière activité",
+    "col_archived": "Archivé",
+    "hint": "💡 Clique sur le nom d’un dépôt pour l’ouvrir dans un nouvel onglet et le masquer de la liste.",
+    "count_singular": "dépôt étoilé",
+    "count_plural": "dépôts étoilés",
+    "all_languages": "Toutes langues",
+    "no_language": "(Sans langage)",
+    "pill_archived": "Archivé"
+}

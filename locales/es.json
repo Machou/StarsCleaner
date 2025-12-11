@@ -1,0 +1,23 @@
+{
+    "title": "Stars Cleaner",
+    "subtitle": "Lista ordenable y filtrable con ocultación automática al hacer clic.",
+    "theme_button_dark": "Modo oscuro",
+    "theme_button_light": "Modo claro",
+    "show_archived_only": "Mostrar solo repositorios archivados",
+    "search_label": "Buscar:",
+    "search_placeholder": "Nombre del repositorio...",
+    "language_label": "Lenguaje:",
+    "col_repo": "Repositorio",
+    "col_description": "Descripción",
+    "col_language": "Lenguaje",
+    "col_stars": "Estrellas ★",
+    "col_created": "Creado el",
+    "col_pushed": "Última actividad",
+    "col_archived": "Archivado",
+    "hint": "💡 Haz clic en el nombre de un repositorio para abrirlo en una nueva pestaña y ocultarlo de la lista.",
+    "count_singular": "repositorio marcado",
+    "count_plural": "repositorios marcados",
+    "all_languages": "Todos los lenguajes",
+    "no_language": "(Sin lenguaje)",
+    "pill_archived": "Archivado"
+}
