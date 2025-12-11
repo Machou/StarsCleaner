@@ -3,10 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-if (!GITHUB_TOKEN || GITHUB_TOKEN === "TON_TOKEN_ICI") {
-	console.error("❌ Erreur : ajoute ton token GitHub dans la variable GITHUB_TOKEN tout en haut du fichier.");
-	process.exit(1);
+if (!GITHUB_TOKEN) {
+    console.error("❌ Error: The environment variable STARRED_TOKEN is not defined");
+    process.exit(1);
 }
+
 
 const api = axios.create({
 	baseURL: "https://api.github.com",
@@ -76,7 +77,7 @@ async function fetchAllStarred() {
 				const res = await fetchStarredPage(page, perPage);
 				results.push(...res.data);
 			} catch (err) {
-				console.error(`Erreur sur la page ${page}:`, err.response?.status || err.message);
+				console.error(`Error on page ${page}:`, err.response?.status || err.message);
 			}
 		}
 	}
@@ -117,10 +118,10 @@ window.STARRED_REPOS = ${json};
 
 		const outPath = path.join(process.cwd(), "starred-data.js");
 		fs.writeFileSync(outPath, content, "utf8");
-		console.log("✔ Fichier généré :", outPath);
-		console.log("Ouvre index.html dans ton navigateur (via un petit serveur HTTP).");
+		console.log("✔ File generated:", outPath);
+		console.log("Open index.html in you're navigator (with a little HTTP server).");
 	} catch (err) {
-		console.error("Erreur:", err.response?.data || err.message || err);
+		console.error("Error:", err.response?.data || err.message || err);
 		process.exit(1);
 	}
 }
