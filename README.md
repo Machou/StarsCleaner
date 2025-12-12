@@ -1,8 +1,8 @@
 <p align="center">
   <a href="https://machou.github.io/StarsCleaner/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/img/logo-light.png" />
-      <source media="(prefers-color-scheme: light)" srcset="assets/img/logo-dark.png" />
+      <source media="(prefers-color-scheme: dark)" srcset="assets/img/logo-dark.png" />
+      <source media="(prefers-color-scheme: light)" srcset="assets/img/logo-light.png" />
       <img src="assets/img/logo-light.png" alt="Stars Cleaner" width="320px" />
     </picture>
   </a>
