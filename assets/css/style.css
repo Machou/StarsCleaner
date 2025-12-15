@@ -233,7 +233,7 @@ body.light .field select {
     overflow: hidden;
     background: rgba(15, 23, 42, .96);
     max-height: 75vh;
-    overflow-y: auto;
+    overflow: auto;
 }
 
 body.light .table-wrapper {
