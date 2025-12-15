@@ -373,10 +373,18 @@ body.light .pill-archived {
 
 .hint {
 	font-size: .9rem;
-	padding: .5rem 0 0 0;
+	padding: 1.25rem 0 0 0;
 }
 
 @media (max-width: 768px) {
+    .table-wrapper::after {
+        content: "← swipe →";
+        display: block;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--muted);
+        padding: 0.4rem 0;
+    }
 
     th:nth-child(2),
     td:nth-child(2) {
