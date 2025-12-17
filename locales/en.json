@@ -1,4 +1,5 @@
 {
+	"page_title": "Stars Cleaner - Cleaning up starred GitHub repositories",
     "title": "Stars Cleaner",
     "subtitle": "Sortable, filterable list with auto-hide on click.",
     "theme_button_dark": "Dark mode",
@@ -17,5 +18,8 @@
     "count_plural": "starred repositories",
     "all_languages": "All languages",
     "no_language": "(No language)",
-    "pill_archived": "Archived"
+    "pill_archived": "Archived",
+	"all_created_years": "Created: all",
+	"all_activity_years": "Activity: all",
+	"reset_filters": "Reset filters"
 }

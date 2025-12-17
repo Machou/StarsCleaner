@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-	<title>Dépôts GitHub étoilés</title>
+	<title></title>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -20,7 +20,7 @@
 			<div>
 				<h1>
 					<span class="logo">★</span>
-					<span data-i18n="title">Dépôts GitHub étoilés</span>
+					<a href=""><span data-i18n="title">Stars Cleaner</span></a>
 				</h1>
 				<p class="subtitle" data-i18n="subtitle">
 					Liste triable, filtrable, avec masquage automatique au clic.
@@ -48,10 +48,19 @@
 						<input type="checkbox" id="toggle-archived">
 						<span data-i18n="show_archived_only">Afficher uniquement les dépôts archivés</span>
 					</label>
+					<button id="reset-filters" class="btn" type="button" data-i18n="reset_filters">
+						Réinitialiser les filtres
+					</button>
 				</div>
 				<div class="controls-right">
 					<div class="field">
 						<input type="text" id="search-name" placeholder="Nom du dépôt..." data-i18n-placeholder="search_placeholder">
+					</div>
+					<div class="field">
+						<select id="filter-created-year"></select>
+					</div>
+					<div class="field">
+						<select id="filter-activity-year"></select>
 					</div>
 					<div class="field">
 						<select id="filter-language" class="filters-language">

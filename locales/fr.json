@@ -1,4 +1,5 @@
 {
+	"page_title": "Stars Cleaner - Nettoyage de dépôts GitHub étoilés",
     "title": "Stars Cleaner",
     "subtitle": "Liste triable, filtrable, avec masquage automatique au clic.",
     "theme_button_dark": "Mode sombre",
@@ -17,5 +18,8 @@
     "count_plural": "dépôts étoilés",
     "all_languages": "Toutes langues",
     "no_language": "(Sans langage)",
-    "pill_archived": "Archivé"
+    "pill_archived": "Archivé",
+	"all_created_years": "Création : toutes",
+	"all_activity_years": "Activité : toutes",
+	"reset_filters": "Réinitialiser les filtres"
 }

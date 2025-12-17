@@ -1,4 +1,5 @@
 {
+	"page_title": "Stars Cleaner: limpieza de repositorios destacados de GitHub",
     "title": "Stars Cleaner",
     "subtitle": "Lista ordenable y filtrable con ocultación automática al hacer clic.",
     "theme_button_dark": "Modo oscuro",
@@ -17,5 +18,8 @@
     "count_plural": "repositorios marcados",
     "all_languages": "Todos los lenguajes",
     "no_language": "(Sin lenguaje)",
-    "pill_archived": "Archivado"
+    "pill_archived": "Archivado",
+	"all_created_years": "Creación: todas",
+	"all_activity_years": "Actividad: todas",
+	"reset_filters": "Restablecer filtros"
 }
