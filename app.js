@@ -1,10 +1,15 @@
 // app.js
 (() => {
 	// ----------------------------------------
-	// Storage
+	// Configuration
 	// ----------------------------------------
 	const STORAGE_KEY = "starred_viewer_state_v1";
+	const LANGUAGE_SLUGS_JSON_URL = "./assets/img/languages.json";
+	const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
 
+	// ----------------------------------------
+	// Storage helpers
+	// ----------------------------------------
 	const loadState = () => {
 		try {
 			const raw = localStorage.getItem(STORAGE_KEY);
@@ -16,9 +21,8 @@
 
 	const saveState = () => {
 		const state = {
-			lang: stateLang,
+			lang: uiLang,
 			theme: document.body.classList.contains("light") ? "light" : "dark",
-
 			filters: {
 				archivedOnly,
 				searchQuery,
@@ -26,16 +30,14 @@
 				createdYearFilter,
 				activityYearFilter
 			},
-
 			sort: { ...sortState },
-
 			hiddenRepos: Array.from(hiddenRepos)
 		};
 
 		try {
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 		} catch {
-			// Ignore storage quota errors
+			// ignore quota errors
 		}
 	};
 
@@ -43,7 +45,7 @@
 	// Data / State
 	// ----------------------------------------
 	const repos = (window.STARRED_REPOS || []).map((r) => ({ ...r }));
-	const hiddenRepos = new Set(); // store by full_name
+	const hiddenRepos = new Set(); // stored by full_name
 
 	let archivedOnly = false;
 	let searchQuery = "";
@@ -52,13 +54,16 @@
 	let activityYearFilter = "__ALL__";
 
 	let sortState = { key: "stars", dir: "desc" };
-	let stateLang = "fr";
+	let uiLang = "fr";
 
+	// i18n dictionaries
 	const dictionaries = {};
-	let languageIconMap = {}; // loaded from ./assets/icons/languages.json
+
+	// Language -> simpleicons slug map
+	let languageSlugMap = {};
 
 	// ----------------------------------------
-	// Helpers
+	// Generic helpers
 	// ----------------------------------------
 	const escapeHtml = (str) => {
 		if (!str) return "";
@@ -102,7 +107,7 @@
 	// i18n
 	// ----------------------------------------
 	const dictFor = (lang) => dictionaries[lang] || dictionaries["fr"] || {};
-	const t = (key) => dictFor(stateLang)[key] ?? key;
+	const t = (key) => dictFor(uiLang)[key] ?? key;
 
 	const loadLang = async (lang) => {
 		if (dictionaries[lang]) return;
@@ -112,11 +117,11 @@
 	};
 
 	const applyTranslations = () => {
-		// <title>
+		// Translate <title>
 		const title = t("page_title");
 		if (title && title !== "page_title") document.title = title;
 
-		// Static texts
+		// Static labels
 		document.querySelectorAll("[data-i18n]").forEach((el) => {
 			const key = el.getAttribute("data-i18n");
 			if (!key) return;
@@ -130,7 +135,7 @@
 			el.setAttribute("placeholder", t(key));
 		});
 
-		// Theme button text (if you still use text on it)
+		// Theme button text (if button uses text)
 		const themeBtn = document.getElementById("toggle-theme");
 		if (themeBtn) {
 			const isLight = document.body.classList.contains("light");
@@ -139,7 +144,7 @@
 	};
 
 	const setLanguage = async (lang) => {
-		stateLang = lang;
+		uiLang = lang;
 		await loadLang(lang);
 		applyTranslations();
 		initLanguageFilterOptions();
@@ -150,33 +155,57 @@
 	};
 
 	// ----------------------------------------
-	// Language icons (JSON → svg files)
+	// Simple Icons CDN mapping
 	// ----------------------------------------
-	const loadLanguageIcons = async () => {
+	const loadLanguageSlugs = async () => {
 		try {
-			const res = await fetch("./assets/img/languages.json");
+			const res = await fetch(LANGUAGE_SLUGS_JSON_URL);
 			if (!res.ok) throw new Error("languages.json not found");
-			languageIconMap = await res.json();
+			const json = await res.json();
+			// Expect: { "Python": "python", ... }
+			languageSlugMap = json && typeof json === "object" ? json : {};
 		} catch (e) {
-			console.warn("Language icons not loaded:", e);
-			languageIconMap = {};
+			console.warn("Language slugs not loaded:", e);
+			languageSlugMap = {};
 		}
 	};
+
+	// const toCdnIconUrl = (slug) => `${SIMPLE_ICONS_CDN}/${encodeURIComponent(slug)}`;
+
+	// const getLanguageSlug = (language) => {
+	// 	if (!language) return null;
+	// 	const mapped = languageSlugMap[language];
+	// 	if (typeof mapped === "string" && mapped.trim() !== "") return mapped.trim();
+	// 	return DEFAULT_ICON_SLUG;
+	// };
 
 	const renderLanguageIcon = (language) => {
 		if (!language) return "";
 
-		const file = languageIconMap[language];
+		const mapped = languageSlugMap[language];
+		const hasSlug = typeof mapped === "string" && mapped.trim() !== "";
 
-		// If icon is missing or empty → fallback
-		const iconFile = file && file.trim() !== ""
-			? file
-			: "unknow.svg";
+		// If no icon available → display language name as text
+		if (!hasSlug) {
+					return `
+			<span class="lang-text" title="${escapeHtml(language)}">
+				${escapeHtml(language)}
+			</span>
+			`;
+		}
+
+		// Icon via Simple Icons CDN
+		const src = `https://cdn.simpleicons.org/${encodeURIComponent(mapped.trim())}`;
 
 		return `
-			<span class="lang-icon" title="${escapeHtml(language)}">
-				<img src="./assets/img/icons/${encodeURIComponent(iconFile)}" alt="${escapeHtml(language)}" loading="lazy">
-			</span>
+		<span class="lang-icon" title="${escapeHtml(language)}">
+		<img
+			src="${src}"
+			alt="${escapeHtml(language)}"
+			loading="lazy"
+			referrerpolicy="no-referrer"
+		>
+		</span>
 		`;
 	};
 
@@ -265,7 +294,7 @@
 	};
 
 	// ----------------------------------------
-	// Options builders (selects)
+	// Select options builders
 	// ----------------------------------------
 	const initLanguageFilterOptions = () => {
 		const select = document.getElementById("filter-language");
@@ -401,7 +430,6 @@
 		hiddenRepos.clear();
 		sortState = { key: "stars", dir: "desc" };
 
-		// Update UI controls
 		const archivedEl = document.getElementById("toggle-archived");
 		if (archivedEl) archivedEl.checked = false;
 
@@ -422,26 +450,26 @@
 	document.addEventListener("DOMContentLoaded", async () => {
 		const saved = loadState();
 
-		// Theme: default is light in your project
+		// Theme: default is light
 		if (saved?.theme === "dark") {
 			document.body.classList.remove("light");
 		} else {
 			document.body.classList.add("light");
 		}
 
-		// Load locales
+		// Locales
 		const initialLang = saved?.lang || "fr";
 		try {
 			await loadLang("fr");
 			if (initialLang !== "fr") await loadLang(initialLang);
-			stateLang = initialLang;
+			uiLang = initialLang;
 			applyTranslations();
 		} catch (e) {
 			console.error("Locales load error:", e);
 		}
 
-		// Load language icons map
-		await loadLanguageIcons();
+		// Load language -> slug mapping
+		await loadLanguageSlugs();
 
 		// Restore filters/sort/hidden
 		if (saved?.filters) {
@@ -460,13 +488,13 @@
 			saved.hiddenRepos.forEach((n) => hiddenRepos.add(n));
 		}
 
-		// Init select options
+		// Init selects
 		initLanguageFilterOptions();
 		initYearFilterOptions();
 
-		// Set UI control values
+		// Set UI values
 		const uiLangSelect = document.getElementById("lang-select");
-		if (uiLangSelect) uiLangSelect.value = stateLang;
+		if (uiLangSelect) uiLangSelect.value = uiLang;
 
 		const archivedEl = document.getElementById("toggle-archived");
 		if (archivedEl) archivedEl.checked = archivedOnly;
@@ -562,7 +590,7 @@
 			});
 		}
 
-		// Theme toggle (kept as-is)
+		// Theme toggle
 		const themeBtn = document.getElementById("toggle-theme");
 		if (themeBtn) {
 			themeBtn.addEventListener("click", () => {
