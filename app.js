@@ -167,9 +167,14 @@
 		if (!language) return "";
 
 		const file = languageIconMap[language];
-		if (!file) {
-			return `<span title="${escapeHtml(language)}">${escapeHtml(language)}</span>`;
-		}
+
+		// If icon is missing or empty → fallback
+		const iconFile = file && file.trim() !== ""
+			? file
+			: "unknow.svg";
+		// if (!file) {
+		// 	return `<span title="${escapeHtml(language)}">${escapeHtml(language)}</span>`;
+		// }
 
 		return `
 		<span class="lang-icon" title="${escapeHtml(language)}">
