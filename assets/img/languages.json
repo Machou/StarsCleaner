@@ -1,0 +1,9 @@
+{
+	"PHP": "php.svg",
+	"JavaScript": "javascript.svg",
+	"TypeScript": "typescript.svg",
+	"HTML": "html.svg",
+	"CSS": "css.svg",
+	"Python": "python.svg",
+	"Rust": "rust.svg"
+}
