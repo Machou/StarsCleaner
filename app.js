@@ -172,14 +172,11 @@
 		const iconFile = file && file.trim() !== ""
 			? file
 			: "unknow.svg";
-		// if (!file) {
-		// 	return `<span title="${escapeHtml(language)}">${escapeHtml(language)}</span>`;
-		// }
 
 		return `
-		<span class="lang-icon" title="${escapeHtml(language)}">
-			<img src="./assets/img/icons/${encodeURIComponent(file)}" alt="${escapeHtml(language)}">
-		</span>
+			<span class="lang-icon" title="${escapeHtml(language)}">
+				<img src="./assets/img/icons/${encodeURIComponent(iconFile)}" alt="${escapeHtml(language)}" loading="lazy">
+			</span>
 		`;
 	};
 
