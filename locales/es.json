@@ -21,5 +21,9 @@
     "pill_archived": "Archivado",
 	"all_created_years": "Creación: todas",
 	"all_activity_years": "Actividad: todas",
-	"reset_filters": "Restablecer filtros"
+	"reset_filters": "Restablecer filtros",
+	"swipe_hint": "deslizar",
+	"lang_na": "n/a",
+	"lang_none_title": "sin lenguaje",
+	"lang": "Lenguaje"
 }

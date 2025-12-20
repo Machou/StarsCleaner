@@ -1,13 +1,10 @@
 <p align="center">
   <a href="https://machou.github.io/StarsCleaner/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/img/logo-dark.png" />
-      <source media="(prefers-color-scheme: light)" srcset="assets/img/logo-light.png" />
-      <img src="assets/img/logo-light.png" alt="Stars Cleaner" width="320px" />
+      <img src="assets/img/logo.png" alt="Stars Cleaner" width="320px" />
     </picture>
   </a>
 </p>
-
 
 # Stars Cleaner
 
@@ -73,13 +70,15 @@ Then open the URL shown in the terminal.
 ## 📂 Project structure
 ```
 tree -L 3 -I "node_modules"
-
+.
 ├── app.js
 ├── assets
 │   ├── css
 │   │   └── style.css
 │   └── img
-│       └── preview.png
+│       ├── languages.json
+│       ├── logo.png
+│       ├── preview.png
 ├── fetch_starred.js
 ├── index.html
 ├── LICENSE
@@ -93,12 +92,19 @@ tree -L 3 -I "node_modules"
 └── starred-data.js
 ```
 
-5 directories, 13 files
+5 directories, 16 files
 
 
 ## 🖼️ Preview
 
 ![Preview](./assets/img/preview.png?v2)
+
+
+## 🙏 Thanks To
+
+- [Simple Icons](https://github.com/simple-icons/simple-icons)
+- [Font Awesome](https://github.com/FortAwesome/Font-Awesome)
+- Logo : [ChatGPT](https://chatgpt.com/)
 
 
 ## 👨‍💻 Contribute

@@ -18,9 +18,8 @@
 	<header>
 		<div class="title-row">
 			<div>
-				<h1>
-					<span class="logo">★</span>
-					<a href=""><span data-i18n="title">Stars Cleaner</span></a>
+				<h1 class="logo">
+					<a href=""><img src="assets/img/logo.png" alt="Logo Stars Cleaner" title="Logo Stars Cleaner"></a>
 				</h1>
 				<p class="subtitle" data-i18n="subtitle">
 					Liste triable, filtrable, avec masquage automatique au clic.
@@ -33,7 +32,7 @@
 					<option value="es">🇪🇸 Español</option>
 				</select>
 
-				<button id="toggle-theme" class="btn" type="button" data-i18n="theme_button">
+				<button id="toggle-theme" class="btn btn-change-theme" type="button" data-i18n="theme_button">
 					Mode sombre
 				</button>
 			</div>
@@ -87,6 +86,10 @@
 				</table>
 			</div>
 
+			<div class="table-hint">
+				<span data-i18n="swipe_hint">glisser</span>
+			</div>
+
 			<div class="hint" data-i18n="hint">
 				💡 Clique sur le nom d’un dépôt pour l’ouvrir dans un nouvel onglet et le masquer de la liste.
 			</div>
@@ -116,13 +119,13 @@
 		</div>
 
 		<div>
-			<p>Thanks to <a href="https://github.com/simple-icons/simple-icons" class="fw-strong">Simple Icons</a> and <a href="https://github.com/FortAwesome/Font-Awesome" class="fw-strong">Font-Awesome</a></p>
+			<p>Thanks to <a href="https://github.com/simple-icons/simple-icons" class="fw-bold">Simple Icons</a>, <a href="https://github.com/FortAwesome/Font-Awesome" class="fw-bold">Font-Awesome</a> and <a href="https://chatgpt.com/" class="fw-bold">ChatGPT</a></p>
 		</div>
 
 		<p>2025</p>
 	</footer>
 
 	<script src="starred-data.js"></script>
-	<script src="app.js?ver=2"></script>
+	<script src="app.js?ver=3"></script>
 </body>
 </html>
