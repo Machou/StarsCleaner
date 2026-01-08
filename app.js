@@ -2,11 +2,19 @@
     const STORAGE_KEY = "starred_viewer_state_v1";
     const LANGUAGE_SLUGS_JSON_URL = "./assets/img/languages.json";
     const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
-    const LOCAL_LANGUAGE_ICONS = {
-        Awesome: "./assets/img/icons/awesome.svg"
+    const RENDER_CHUNK_SIZE = 200;
+    const AWESOME_ICON_URL = "./assets/img/icons/awesome.svg";
+    const AWESOME_DESC_KEYWORDS = ["list", "awesome", "curated"];
+
+    const isAwesomeRepo = (repo) => {
+        const name = String(repo?.name || repo?.full_name || "").toLowerCase();
+        const desc = String(repo?.description || "").toLowerCase();
+
+        if (!name.includes("awesome")) return false;
+
+        return AWESOME_DESC_KEYWORDS.some((k) => desc.includes(k));
     };
 
-    const RENDER_CHUNK_SIZE = 200;
     let renderJobId = 0;
 
     const loadState = () => {
@@ -162,24 +170,24 @@
     };
 
     const renderLanguageIcon = (language) => {
-        if (!language) {
+        const language = repo.language;
+
+        if (isAwesomeRepo(repo)) {
             return `
-            <span class="lang-na" title="${escapeHtml(t("lang_none_title"))}">
-                ${escapeHtml(t("lang_na"))}
+            <span class="lang-icon" title="${escapeHtml(t("awesome_list"))}">
+                <img
+                    src="${escapeHtml(AWESOME_ICON_URL)}"
+                    alt="Awesome"
+                    loading="lazy"
+                >
             </span>
             `;
         }
 
-        const localIcon = LOCAL_LANGUAGE_ICONS[language];
-        if (typeof localIcon === "string" && localIcon.trim() !== "") {
+        if (!language) {
             return `
-            <span class="lang-icon" title="${escapeHtml(t("lang"))} : ${escapeHtml(language)}">
-            <img
-                src="${escapeHtml(localIcon)}"
-                alt="${escapeHtml(language)}"
-                title="Awesome"
-                loading="lazy"
-            >
+            <span class="lang-na" title="${escapeHtml(t("lang_none_title"))}">
+                ${escapeHtml(t("lang_na"))}
             </span>
             `;
         }
@@ -383,7 +391,7 @@
             <td class="name">
             <a href="${repo.html_url}" class="repo-link" target="_blank" rel="noopener noreferrer" data-fullname="${escapeHtml(repo.full_name)}">${escapeHtml(repo.full_name)}</a></td>
             <td class="description">${escapeHtml(repo.description || "")}</td>
-            <td class="text-center">${renderLanguageIcon(repo.language)}</td>
+            <td class="text-center">${renderLanguageIcon(repo)}</td>
             <td class="numeric">${formatStars(repo.stargazers_count)}</td>
             <td class="text-center">${formatDate(repo.created_at)}</td>
             <td class="text-center">${formatDate(repo.pushed_at)}</td>
