@@ -139,7 +139,7 @@ footer p {
 	text-align: center;
 }
 
-footer > div {
+footer>div {
 	max-width: calc(36em + 36ex);
 	margin: 1rem auto;
 	width: 100%;

@@ -20,7 +20,6 @@ const api = axios.create({
     timeout: 15000
 });
 
-// --- Parsing du header Link pour trouver la dernière page ---
 function getLastPageFromLink(linkHeader) {
     if (!linkHeader) return 1;
     const parts = linkHeader.split(",");
@@ -36,7 +35,6 @@ function getLastPageFromLink(linkHeader) {
     return 1;
 }
 
-// --- Récupération d'une page ---
 async function fetchStarredPage(page, perPage) {
     const res = await api.get("/user/starred", {
         params: { per_page: perPage, page }
@@ -47,7 +45,6 @@ async function fetchStarredPage(page, perPage) {
     };
 }
 
-// --- Récupération rapide (parallélisée) de tous les dépôts étoilés ---
 async function fetchAllStarred() {
     const perPage = 100;
 
@@ -67,7 +64,7 @@ async function fetchAllStarred() {
         pages.push(p);
     }
 
-    const concurrency = 5; // nombre max de requêtes en parallèle
+    const concurrency = 5;
     let index = 0;
 
     async function worker(workerId) {
@@ -108,7 +105,7 @@ async function main() {
             archived: r.archived,
             created_at: r.created_at,
             pushed_at: r.pushed_at,
-            language: r.language   // <<< langage principal du dépôt
+            language: r.language
         }));
 
         const json = JSON.stringify(simplified).replace(/</g, "\\u003c");

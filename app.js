@@ -1,14 +1,11 @@
 (() => {
-    // ----------------------------------------
-    // Configuration
-    // ----------------------------------------
     const STORAGE_KEY = "starred_viewer_state_v1";
     const LANGUAGE_SLUGS_JSON_URL = "./assets/img/languages.json";
     const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
 
-    // ----------------------------------------
-    // Storage helpers
-    // ----------------------------------------
+    const VIRTUAL_BUFFER_ROWS = 10;
+    const DEFAULT_ROW_HEIGHT = 46;
+
     const loadState = () => {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -35,16 +32,11 @@
 
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch {
-            // ignore quota errors
-        }
+        } catch { }
     };
 
-    // ----------------------------------------
-    // Data / State
-    // ----------------------------------------
     const repos = (window.STARRED_REPOS || []).map((r) => ({ ...r }));
-    const hiddenRepos = new Set(); // stored by full_name
+    const hiddenRepos = new Set();
 
     let archivedOnly = false;
     let searchQuery = "";
@@ -55,15 +47,17 @@
     let sortState = { key: "stars", dir: "desc" };
     let uiLang = "fr";
 
-    // i18n dictionaries
     const dictionaries = {};
 
-    // Language -> simpleicons slug map
     let languageSlugMap = {};
 
-    // ----------------------------------------
-    // Generic helpers
-    // ----------------------------------------
+    let tableWrapperEl = null;
+    let tbodyEl = null;
+    let colCount = 7;
+    let rowHeight = DEFAULT_ROW_HEIGHT;
+    let viewRepos = [];
+    let rafScheduled = false;
+
     const escapeHtml = (str) => {
         if (!str) return "";
         return String(str)
@@ -80,14 +74,12 @@
         return d.getFullYear();
     };
 
-    // French thousands grouping: 1 000 / 10 000 / 100 000
     const formatStars = (count) => {
         const n = Number(count || 0);
         if (Number.isNaN(n)) return "0";
         return n.toLocaleString("fr-FR");
     };
 
-    // Requested date format: "8 dec. 2025" (no leading zero, no accents)
     const formatDate = (iso) => {
         if (!iso) return "";
         const d = new Date(iso);
@@ -96,26 +88,12 @@
         const day = d.getDate();
         const year = d.getFullYear();
         const months = [
-            "janv.",
-            "fevr.",
-            "mars",
-            "avr.",
-            "mai",
-            "juin",
-            "juil.",
-            "aout",
-            "sept.",
-            "oct.",
-            "nov.",
-            "dec."
+            "janv.", "fevr.", "mars", "avr.", "mai", "juin",
+            "juil.", "aout", "sept.", "oct.", "nov.", "dec."
         ];
-
         return `${day} ${months[d.getMonth()] || ""} ${year}`;
     };
 
-    // ----------------------------------------
-    // i18n
-    // ----------------------------------------
     const dictFor = (lang) => dictionaries[lang] || dictionaries["fr"] || {};
     const t = (key) => dictFor(uiLang)[key] ?? key;
 
@@ -127,25 +105,21 @@
     };
 
     const applyTranslations = () => {
-        // Translate <title>
         const title = t("page_title");
         if (title && title !== "page_title") document.title = title;
 
-        // Static labels
         document.querySelectorAll("[data-i18n]").forEach((el) => {
             const key = el.getAttribute("data-i18n");
             if (!key) return;
             el.textContent = t(key);
         });
 
-        // Placeholders
         document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
             const key = el.getAttribute("data-i18n-placeholder");
             if (!key) return;
             el.setAttribute("placeholder", t(key));
         });
 
-        // Theme button text (if button uses text)
         const themeBtn = document.getElementById("toggle-theme");
         if (themeBtn) {
             const isLight = document.body.classList.contains("light");
@@ -162,20 +136,18 @@
         initYearFilterOptions();
         updateSortHeaderClasses();
 
-        render();
+        rebuildViewAndRender(true);
         saveState();
     };
 
-    // ----------------------------------------
-    // Simple Icons CDN mapping
-    // ----------------------------------------
+    // Simple Icons
     const loadLanguageSlugs = async () => {
         try {
             const res = await fetch(LANGUAGE_SLUGS_JSON_URL);
             if (!res.ok) throw new Error("languages.json not found");
 
             const json = await res.json();
-            // Expect: { "Python": "python", ... }
+
             languageSlugMap = json && typeof json === "object" ? json : {};
         } catch (e) {
             console.warn("Language slugs not loaded:", e);
@@ -183,14 +155,10 @@
         }
     };
 
-    const renderLanguageIcon = (language) => {
-        // If GitHub doesn't provide a language
+    const renderLanguageCell = (language) => {
         if (!language) {
             return `
-            <span
-                class="lang-na"
-                title="${escapeHtml(t("lang_none_title"))}"
-            >
+            <span class="lang-na" title="${escapeHtml(t("lang_none_title"))}">
                 ${escapeHtml(t("lang_na"))}
             </span>
             `;
@@ -199,32 +167,28 @@
         const mapped = languageSlugMap[language];
         const hasSlug = typeof mapped === "string" && mapped.trim() !== "";
 
-        // If no icon available → display language name as text
         if (!hasSlug) {
             return `
-            <span class="lang-text" title="${escapeHtml(t("lang"))} : ${escapeHtml(language)}">
-                ${escapeHtml(language)}
-            </span>
+                <span class="lang-text" title="${escapeHtml(language)}">
+                    ${escapeHtml(language)}
+                </span>
             `;
         }
 
         const src = `${SIMPLE_ICONS_CDN}/${encodeURIComponent(mapped.trim())}`;
 
         return `
-		<span class="lang-icon" title="${escapeHtml(t("lang"))} : ${escapeHtml(language)}">
-		<img
-			src="${src}"
-			alt="${escapeHtml(language)}"
-			loading="lazy"
-			referrerpolicy="no-referrer"
-		>
-		</span>
-	`;
+            <span class="lang-icon" title="${escapeHtml(language)}">
+                <img
+                    src="${src}"
+                    alt="${escapeHtml(language)}"
+                    loading="lazy"
+                    referrerpolicy="no-referrer"
+                >
+            </span>
+        `;
     };
 
-    // ----------------------------------------
-    // Filters
-    // ----------------------------------------
     const passesFilters = (repo) => {
         if (hiddenRepos.has(repo.full_name)) return false;
         if (archivedOnly && !repo.archived) return false;
@@ -257,14 +221,11 @@
         return true;
     };
 
-    // ----------------------------------------
-    // Sorting
-    // ----------------------------------------
-    const sortRepos = () => {
+    const sortInPlace = (arr) => {
         const { key, dir } = sortState;
         const factor = dir === "asc" ? 1 : -1;
 
-        repos.sort((a, b) => {
+        arr.sort((a, b) => {
             let va;
             let vb;
 
@@ -306,9 +267,6 @@
         });
     };
 
-    // ----------------------------------------
-    // Select options builders
-    // ----------------------------------------
     const initLanguageFilterOptions = () => {
         const select = document.getElementById("filter-language");
         if (!select) return;
@@ -325,9 +283,9 @@
         );
 
         let options = `
-			<option value="__ALL__">${escapeHtml(t("all_languages"))}</option>
-			<option value="__NONE__">${escapeHtml(t("no_language"))}</option>
-		`;
+            <option value="__ALL__">${escapeHtml(t("all_languages"))}</option>
+            <option value="__NONE__">${escapeHtml(t("no_language"))}</option>
+        `;
 
         languages.forEach((lang) => {
             options += `<option value="${escapeHtml(lang)}">${escapeHtml(lang)}</option>`;
@@ -364,10 +322,7 @@
         if (createdSelect) {
             const prev = createdYearFilter || createdSelect.value || "__ALL__";
             let opts = `<option value="__ALL__">${escapeHtml(t("all_created_years"))}</option>`;
-            createdList.forEach((y) => {
-                opts += `<option value="${y}">${y}</option>`;
-            });
-
+            createdList.forEach((y) => (opts += `<option value="${y}">${y}</option>`));
             createdSelect.innerHTML = opts;
 
             createdYearFilter =
@@ -378,10 +333,7 @@
         if (activitySelect) {
             const prev = activityYearFilter || activitySelect.value || "__ALL__";
             let opts = `<option value="__ALL__">${escapeHtml(t("all_activity_years"))}</option>`;
-            activityList.forEach((y) => {
-                opts += `<option value="${y}">${y}</option>`;
-            });
-
+            activityList.forEach((y) => (opts += `<option value="${y}">${y}</option>`));
             activitySelect.innerHTML = opts;
 
             activityYearFilter =
@@ -390,65 +342,119 @@
         }
     };
 
-    // ----------------------------------------
-    // Rendering
-    // ----------------------------------------
     const updateCount = () => {
         const el = document.getElementById("repo-count");
         if (!el) return;
 
         const total = repos.length;
-        const visible = repos.filter(passesFilters).length;
+        const visible = viewRepos.length;
         const label = total === 1 ? t("count_singular") : t("count_plural");
         el.textContent = `${visible} / ${total} ${label}`;
     };
 
-    const render = () => {
-        sortRepos();
+    const measureRowHeightIfNeeded = () => {
+        if (!tbodyEl) return;
+        const firstRealRow = tbodyEl.querySelector("tr[data-row='item']");
+        if (!firstRealRow) return;
 
-        const tbody = document.getElementById("repo-body");
-        if (!tbody) return;
+        const rect = firstRealRow.getBoundingClientRect();
+        const h = Math.round(rect.height);
+        if (h && h > 20 && h < 200) rowHeight = h;
+    };
+
+    const buildRowHtml = (repo) => {
+        const archivedPill = repo.archived
+            ? `<span class="pill-archived">${escapeHtml(t("pill_archived"))}</span>`
+            : "";
+
+        return `
+            <tr class="repo-row" data-row="item">
+                <td>
+                    <a
+                        href="${repo.html_url}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="repo-link"
+                        data-fullname="${escapeHtml(repo.full_name)}"
+                    >
+                        ${escapeHtml(repo.full_name)}
+                    </a>
+                </td>
+                <td class="description">${escapeHtml(repo.description || "")}</td>
+                <td class="text-center">${renderLanguageCell(repo.language)}</td>
+                <td class="numeric">${formatStars(repo.stargazers_count)}</td>
+                <td class="text-center">${formatDate(repo.created_at)}</td>
+                <td class="text-center">${formatDate(repo.pushed_at)}</td>
+                <td class="text-center">${archivedPill}</td>
+            </tr>
+        `;
+    };
+
+    const renderVirtual = () => {
+        if (!tbodyEl || !tableWrapperEl) return;
+
+        const totalRows = viewRepos.length;
+        const viewportHeight = tableWrapperEl.clientHeight;
+        const scrollTop = tableWrapperEl.scrollTop;
+
+        const approxStart = Math.floor(scrollTop / rowHeight);
+        const visibleCount = Math.ceil(viewportHeight / rowHeight);
+
+        const startIndex = Math.max(0, approxStart - VIRTUAL_BUFFER_ROWS);
+        const endIndex = Math.min(totalRows, approxStart + visibleCount + VIRTUAL_BUFFER_ROWS);
+
+        const topSpacer = startIndex * rowHeight;
+        const bottomSpacer = Math.max(0, (totalRows - endIndex) * rowHeight);
 
         let html = "";
 
-        repos.forEach((repo, index) => {
-            if (!passesFilters(repo)) return;
+        html += `
+            <tr data-row="spacer-top">
+                <td colspan="${colCount}" style="height:${topSpacer}px; padding:0; border:0;"></td>
+            </tr>
+        `;
 
-            html += `
-			<tr class="repo-row">
-				<td>
-					<a
-					href="${repo.html_url}"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="repo-link"
-					data-index="${index}"
-					>
-					${escapeHtml(repo.full_name)}
-					</a>
-				</td>
-				<td class="description">${escapeHtml(repo.description || "")}</td>
-				<td class="text-center">${renderLanguageIcon(repo.language)}</td>
-				<td class="numeric">${formatStars(repo.stargazers_count)}</td>
-				<td class="text-center">${formatDate(repo.created_at)}</td>
-				<td class="text-center">${formatDate(repo.pushed_at)}</td>
-				<td class="text-center">
-					${repo.archived
-                    ? `<span class="pill-archived">${escapeHtml(t("pill_archived"))}</span>`
-                    : ""
-                }
-				</td>
-			</tr>
-			`;
-        });
+        for (let i = startIndex; i < endIndex; i += 1) {
+            html += buildRowHtml(viewRepos[i]);
+        }
 
-        tbody.innerHTML = html;
+        html += `
+            <tr data-row="spacer-bottom">
+                <td colspan="${colCount}" style="height:${bottomSpacer}px; padding:0; border:0;"></td>
+            </tr>
+        `;
+
+        tbodyEl.innerHTML = html;
         updateCount();
+
+        measureRowHeightIfNeeded();
     };
 
-    // ----------------------------------------
-    // Reset
-    // ----------------------------------------
+    const scheduleVirtualRender = () => {
+        if (rafScheduled) return;
+        rafScheduled = true;
+
+        requestAnimationFrame(() => {
+            rafScheduled = false;
+            renderVirtual();
+        });
+    };
+
+    const rebuildView = () => {
+        viewRepos = repos.filter(passesFilters);
+        sortInPlace(viewRepos);
+    };
+
+    const rebuildViewAndRender = (resetScroll = false) => {
+        rebuildView();
+
+        if (resetScroll && tableWrapperEl) {
+            tableWrapperEl.scrollTop = 0;
+        }
+
+        scheduleVirtualRender();
+    };
+
     const resetAll = () => {
         archivedOnly = false;
         searchQuery = "";
@@ -469,39 +475,35 @@
         initYearFilterOptions();
 
         updateSortHeaderClasses();
-        render();
+        rebuildViewAndRender(true);
         saveState();
     };
 
-    // ----------------------------------------
-    // Bootstrap
-    // ----------------------------------------
     document.addEventListener("DOMContentLoaded", async () => {
         const saved = loadState();
 
-        // Theme: default is light
+        tableWrapperEl = document.querySelector(".table-wrapper");
+        tbodyEl = document.getElementById("repo-body");
+        colCount = document.querySelectorAll("thead th").length || 7;
+
         if (saved?.theme === "dark") {
             document.body.classList.remove("light");
         } else {
             document.body.classList.add("light");
         }
 
-        // Locales
         const initialLang = saved?.lang || "fr";
         try {
             await loadLang("fr");
             if (initialLang !== "fr") await loadLang(initialLang);
-
             uiLang = initialLang;
             applyTranslations();
         } catch (e) {
             console.error("Locales load error:", e);
         }
 
-        // Load language -> slug mapping
         await loadLanguageSlugs();
 
-        // Restore filters/sort/hidden
         if (saved?.filters) {
             archivedOnly = !!saved.filters.archivedOnly;
             searchQuery = saved.filters.searchQuery || "";
@@ -518,11 +520,9 @@
             saved.hiddenRepos.forEach((n) => hiddenRepos.add(n));
         }
 
-        // Init selects
         initLanguageFilterOptions();
         initYearFilterOptions();
 
-        // Set UI values
         const uiLangSelect = document.getElementById("lang-select");
         if (uiLangSelect) uiLangSelect.value = uiLang;
 
@@ -542,101 +542,109 @@
         if (activitySelect) activitySelect.value = activityYearFilter;
 
         updateSortHeaderClasses();
-        render();
+
+        rebuildViewAndRender(true);
         saveState();
 
-        // ----------------------------------------
-        // Events
-        // ----------------------------------------
+        if (tableWrapperEl) {
+            tableWrapperEl.addEventListener("scroll", () => {
+                scheduleVirtualRender();
+            });
 
-        // Hide repo on click
-        const tbody = document.getElementById("repo-body");
-        if (tbody) {
-            tbody.addEventListener("click", (event) => {
+            window.addEventListener("resize", () => {
+                rebuildViewAndRender(false);
+            });
+        }
+
+        if (tbodyEl) {
+            tbodyEl.addEventListener("click", (event) => {
                 const link = event.target.closest(".repo-link");
                 if (!link) return;
 
-                const index = Number(link.dataset.index);
-                const repo = repos[index];
-                if (!repo?.full_name) return;
+                const fullName = link.dataset.fullname;
+                if (!fullName) return;
 
-                hiddenRepos.add(repo.full_name);
-                render();
+                hiddenRepos.add(fullName);
+                rebuildViewAndRender(false);
                 saveState();
             });
         }
 
-        // Archived only
         if (archivedEl) {
             archivedEl.addEventListener("change", () => {
                 archivedOnly = archivedEl.checked;
-                render();
+                rebuildViewAndRender(true);
                 saveState();
             });
         }
 
-        // Search
+        const debounce = (fn, ms = 200) => {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn(...args), ms);
+            };
+        };
+
         if (searchEl) {
-            searchEl.addEventListener("input", () => {
-                searchQuery = searchEl.value.trim();
-                render();
-                saveState();
-            });
+            searchEl.addEventListener(
+                "input",
+                debounce(() => {
+                    searchQuery = searchEl.value.trim();
+                    rebuildViewAndRender(true);
+                    saveState();
+                }, 200)
+            );
         }
 
-        // Repo language filter
         if (repoLangSelect) {
             repoLangSelect.addEventListener("change", () => {
                 languageFilter = repoLangSelect.value;
-                render();
+                rebuildViewAndRender(true);
                 saveState();
             });
         }
 
-        // Created year filter
         if (createdSelect) {
             createdSelect.addEventListener("change", () => {
                 createdYearFilter = createdSelect.value;
-                render();
+                rebuildViewAndRender(true);
                 saveState();
             });
         }
 
-        // Activity year filter
         if (activitySelect) {
             activitySelect.addEventListener("change", () => {
                 activityYearFilter = activitySelect.value;
-                render();
+                rebuildViewAndRender(true);
                 saveState();
             });
         }
 
-        // UI language selector
         if (uiLangSelect) {
             uiLangSelect.addEventListener("change", () => {
-                setLanguage(uiLangSelect.value).catch((err) => {
-                    console.error("Language change error:", err);
-                });
+                setLanguage(uiLangSelect.value).catch((err) =>
+                    console.error("Language change error:", err)
+                );
             });
         }
 
-        // Theme toggle
         const themeBtn = document.getElementById("toggle-theme");
         if (themeBtn) {
             themeBtn.addEventListener("click", () => {
                 document.body.classList.toggle("light");
                 applyTranslations();
                 saveState();
+
+                rebuildViewAndRender(false);
             });
         }
 
-        // Reset filters
         const resetBtn = document.getElementById("reset-filters");
         if (resetBtn) {
             resetBtn.addEventListener("click", () => resetAll());
         }
 
-        // Sorting via headers
         document.querySelectorAll("th[data-sort]").forEach((th) => {
             th.addEventListener("click", () => {
                 const key = th.dataset.sort;
@@ -650,7 +658,7 @@
                 }
 
                 updateSortHeaderClasses();
-                render();
+                rebuildViewAndRender(true);
                 saveState();
             });
         });
