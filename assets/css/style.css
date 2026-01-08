@@ -448,7 +448,7 @@ td.description {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	color: var(--muted);
-	font-size: 0.82rem;
+	font-size: .85rem;
 }
 
 td.language {
@@ -478,14 +478,6 @@ body.light .pill-archived {
 	color: var(--fg);
 	font-size: .9rem;
 	padding: 1.25rem 0 0 0;
-}
-
-.fw-bold {
-	font-weight: bold;
-}
-
-.text-center {
-	text-align: center;
 }
 
 .lang-icon {
