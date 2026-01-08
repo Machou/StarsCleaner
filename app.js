@@ -1,10 +1,18 @@
 (() => {
+	// ----------------------------------------
+	// Configuration
+	// ----------------------------------------
 	const STORAGE_KEY = "starred_viewer_state_v1";
 	const LANGUAGE_SLUGS_JSON_URL = "./assets/img/languages.json";
 	const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
-	const RENDER_CHUNK_SIZE = 200;
+
+	// Non-blocking rendering
+	const RENDER_CHUNK_SIZE = 200; // rows per animation frame
 	let renderJobId = 0;
 
+	// ----------------------------------------
+	// Storage helpers
+	// ----------------------------------------
 	const loadState = () => {
 		try {
 			const raw = localStorage.getItem(STORAGE_KEY);
