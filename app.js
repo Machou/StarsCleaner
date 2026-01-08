@@ -169,8 +169,8 @@
         }
     };
 
-    const renderLanguageIcon = (language) => {
-        const language = repo.language;
+    const renderLanguageIcon = (repo) => {
+        const language = repo?.language;
 
         if (isAwesomeRepo(repo)) {
             return `
