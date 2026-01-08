@@ -4,13 +4,14 @@
     const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
     const RENDER_CHUNK_SIZE = 200;
     const AWESOME_ICON_URL = "./assets/img/awesome.svg";
-    const AWESOME_DESC_KEYWORDS = ["list", "awesome", "curated"];
+    const AWESOME_DESC_KEYWORDS = ["list", "awesome", "curated", "packages", "resources"];
 
     const isAwesomeRepo = (repo) => {
         const name = String(repo?.name || repo?.full_name || "").toLowerCase();
         const desc = String(repo?.description || "").toLowerCase();
 
-        if (!name.includes("awesome")) return false;
+        // if (name.includes("awesome-") || name.endsWith("/awesome") || name.includes("/awesome-")) {
+        if (name.includes("awesome")) return true;
 
         return AWESOME_DESC_KEYWORDS.some((k) => desc.includes(k));
     };
