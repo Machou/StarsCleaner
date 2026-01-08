@@ -2,6 +2,10 @@
     const STORAGE_KEY = "starred_viewer_state_v1";
     const LANGUAGE_SLUGS_JSON_URL = "./assets/img/languages.json";
     const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
+    const LOCAL_LANGUAGE_ICONS = {
+        Awesome: "./assets/img/icons/awesome.svg"
+    };
+
     const RENDER_CHUNK_SIZE = 200;
     let renderJobId = 0;
 
@@ -162,6 +166,20 @@
             return `
             <span class="lang-na" title="${escapeHtml(t("lang_none_title"))}">
                 ${escapeHtml(t("lang_na"))}
+            </span>
+            `;
+        }
+
+        const localIcon = LOCAL_LANGUAGE_ICONS[language];
+        if (typeof localIcon === "string" && localIcon.trim() !== "") {
+            return `
+            <span class="lang-icon" title="${escapeHtml(t("lang"))} : ${escapeHtml(language)}">
+            <img
+                src="${escapeHtml(localIcon)}"
+                alt="${escapeHtml(language)}"
+                title="Awesome"
+                loading="lazy"
+            >
             </span>
             `;
         }
