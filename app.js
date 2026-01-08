@@ -3,7 +3,7 @@
     const LANGUAGE_SLUGS_JSON_URL = "./assets/img/languages.json";
     const SIMPLE_ICONS_CDN = "https://cdn.simpleicons.org";
     const RENDER_CHUNK_SIZE = 200;
-    const AWESOME_ICON_URL = "./assets/img/icons/awesome.svg";
+    const AWESOME_ICON_URL = "./assets/img/awesome.svg";
     const AWESOME_DESC_KEYWORDS = ["list", "awesome", "curated"];
 
     const isAwesomeRepo = (repo) => {
