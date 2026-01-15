@@ -139,9 +139,8 @@ footer p {
 	text-align: center;
 }
 
-footer>div {
-	max-width: calc(36em + 36ex);
-	margin: 1rem auto;
+footer > div {
+	margin: 0 0 1rem;
 	width: 100%;
 }
 
